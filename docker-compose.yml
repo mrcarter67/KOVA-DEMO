@@ -1,0 +1,141 @@
+version: "3.9"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# KOVA · Private Production Stack
+# Llama 4 via Ollama · No external AI calls · 100% on-premise
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ── Ollama — Local AI inference ─────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kova-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"        # API endpoint (internal only — do NOT expose publicly)
+    volumes:
+      - ollama_data:/root/.ollama   # Model weights persist across restarts
+    environment:
+      - OLLAMA_ORIGINS=http://kova-api:3001   # Only KOVA API can call Ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]   # Remove this block if CPU-only
+    networks:
+      - kova-private
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Model Loader — pulls Llama 4 on first start ────────────────────────────
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: kova-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: >
+      sh -c "
+        ollama pull llama4-scout &&
+        ollama pull llama4-maverick &&
+        echo 'Models ready'
+      "
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    networks:
+      - kova-private
+    restart: "no"
+
+  # ── PostgreSQL — Private CRM database ──────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: kova-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kova
+      POSTGRES_USER: kova
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"          # Internal only
+    networks:
+      - kova-private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kova"]
+      interval: 10s
+      retries: 5
+
+  # ── Redis — Session cache ───────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: kova-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - kova-private
+
+  # ── KOVA API — Fastify backend ──────────────────────────────────────────────
+  kova-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: kova-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - AI_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - DATABASE_URL=postgresql://kova:${POSTGRES_PASSWORD}@postgres:5432/kova
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    networks:
+      - kova-private
+      - kova-public
+
+  # ── KOVA Web — Next.js frontend ─────────────────────────────────────────────
+  kova-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: kova-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - AI_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - NEXT_PUBLIC_API_URL=http://kova-api:3001
+    depends_on:
+      - kova-api
+    networks:
+      - kova-private
+      - kova-public
+
+volumes:
+  ollama_data:    # Llama 4 model weights (~52GB total)
+  postgres_data:  # All CRM and ERP data
+  redis_data:     # Session cache
+
+networks:
+  kova-private:   # Internal — Ollama, DB, Redis never exposed
+    internal: true
+  kova-public:    # External — only web and API
