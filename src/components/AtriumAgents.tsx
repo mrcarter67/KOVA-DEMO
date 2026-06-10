@@ -1,18 +1,33 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import {
+  Target, Palette, TrendingUp, Flower2, Leaf, MessageSquare, Star, BarChart3,
+  Lightbulb, Check, Link,
+} from "lucide-react";
+import { IE, useIconMode } from "@/lib/icon-mode";
+
+type IconMap = Record<string, React.ComponentType<any>>;
+const AGENT_ICON_MAP: IconMap = { Target, Palette, TrendingUp, Flower2, Leaf, MessageSquare, Star, BarChart3 };
+const AGENT_ICON_EMOJIS: Record<string, string> = { Target:"🎯", Palette:"🎨", TrendingUp:"📈", Flower2:"🌸", Leaf:"🌿", MessageSquare:"💬", Star:"⭐", BarChart3:"📊" };
+function LkIcon({ m, n, size, color }: { m: IconMap; n: string; size: number; color?: string }) {
+  const { emojiMode } = useIconMode();
+  if (emojiMode && AGENT_ICON_EMOJIS[n]) return <span style={{ fontSize: size, lineHeight: 1, display: "inline-flex", alignItems: "center" }}>{AGENT_ICON_EMOJIS[n]}</span>;
+  const Ic = m[n];
+  return Ic ? <Ic size={size} color={color} /> : null;
+}
 
 interface Message { role:"user"|"assistant"; content:string; }
 interface BusinessCtx { [key:string]: any; }
 
 const AGENTS = [
-  { id:"maven",  name:"Maven",  role:"Team Lead",       icon:"🎯", color:"#00C8A0", desc:"Discovery, strategy, coordination. Start here.",        badge:"Start here" },
-  { id:"iris",   name:"Iris",   role:"Brand",           icon:"🎨", color:"#EC4899", desc:"Voice, visual identity, messaging guide.",              badge:"" },
-  { id:"dash",   name:"Dash",   role:"Paid Media",      icon:"📈", color:"#3B82F6", desc:"Audiences, ads, conversion. Google + Meta.",            badge:"" },
-  { id:"poppy",  name:"Poppy",  role:"Organic Social",  icon:"🌸", color:"#F59E0B", desc:"Instagram, Facebook, TikTok, LinkedIn.",                badge:"" },
-  { id:"sage",   name:"Sage",   role:"SEO + Web",       icon:"🌿", color:"#10B981", desc:"Search rankings, website, landing pages.",              badge:"" },
-  { id:"echo",   name:"Echo",   role:"Email + SMS",     icon:"💬", color:"#8B5CF6", desc:"Sequences, newsletters, lifecycle campaigns.",          badge:"" },
-  { id:"stella", name:"Stella", role:"Reputation",      icon:"⭐", color:"#EF4444", desc:"Reviews, listings, response strategy.",                 badge:"" },
-  { id:"atlas",  name:"Atlas",  role:"Data + CRM",      icon:"📊", color:"#6366F1", desc:"Revenue, attribution, dashboards. Honest reporting.",   badge:"" },
+  { id:"maven",  name:"Maven",  role:"Team Lead",       icon:"Target",       color:"#00C8A0", desc:"Discovery, strategy, coordination. Start here.",        badge:"Start here" },
+  { id:"iris",   name:"Iris",   role:"Brand",           icon:"Palette",      color:"#EC4899", desc:"Voice, visual identity, messaging guide.",              badge:"" },
+  { id:"dash",   name:"Dash",   role:"Paid Media",      icon:"TrendingUp",   color:"#3B82F6", desc:"Audiences, ads, conversion. Google + Meta.",            badge:"" },
+  { id:"poppy",  name:"Poppy",  role:"Organic Social",  icon:"Flower2",      color:"#F59E0B", desc:"Instagram, Facebook, TikTok, LinkedIn.",                badge:"" },
+  { id:"sage",   name:"Sage",   role:"SEO + Web",       icon:"Leaf",         color:"#10B981", desc:"Search rankings, website, landing pages.",              badge:"" },
+  { id:"echo",   name:"Echo",   role:"Email + SMS",     icon:"MessageSquare",color:"#8B5CF6", desc:"Sequences, newsletters, lifecycle campaigns.",          badge:"" },
+  { id:"stella", name:"Stella", role:"Reputation",      icon:"Star",         color:"#EF4444", desc:"Reviews, listings, response strategy.",                 badge:"" },
+  { id:"atlas",  name:"Atlas",  role:"Data + CRM",      icon:"BarChart3",    color:"#6366F1", desc:"Revenue, attribution, dashboards. Honest reporting.",   badge:"" },
 ];
 
 const QUICK_STARTS: Record<string, string> = {
@@ -91,7 +106,7 @@ export default function AtriumAgents() {
               <span style={{fontSize:11,color:"#334155"}}>Your marketing team</span>
             </div>
             {activeId && agent && (
-              <div style={{fontSize:11,color:agent.color,marginTop:1}}>{agent.icon} Talking to {agent.name} · {agent.role}</div>
+              <div style={{fontSize:11,color:agent.color,marginTop:1,display:"flex",alignItems:"center",gap:4}}><LkIcon m={AGENT_ICON_MAP} n={agent.icon} size={11} color={agent.color} />Talking to {agent.name} · {agent.role}</div>
             )}
           </div>
         </div>
@@ -136,13 +151,13 @@ export default function AtriumAgents() {
           {/* Context status */}
           {ctxKeys.length===0 && (
             <div style={{padding:"10px 14px",background:"#FFF7ED",border:"1px solid #FED7AA",borderRadius:8,marginBottom:14,fontSize:12,color:"#92400E",display:"flex",gap:8,alignItems:"center"}}>
-              <span>💡</span>
+              <IE emoji="💡" Icon={Lightbulb} size={14} color="#92400E" />
               <span>Start with <strong>Maven</strong> to run discovery. The more she learns, the smarter every other agent becomes.</span>
             </div>
           )}
           {ctxKeys.length>=3 && (
             <div style={{padding:"10px 14px",background:"#F0FDF4",border:"1px solid #86EFAC",borderRadius:8,marginBottom:14,fontSize:12,color:"#15803D",display:"flex",gap:8,alignItems:"center"}}>
-              <span>✓</span>
+              <IE emoji="✅" Icon={Check} size={14} color="#15803D" />
               <span><strong>{bCtx.company_name||"Your business"}</strong> context loaded. All agents are reading from the same discovery.</span>
             </div>
           )}
@@ -155,8 +170,8 @@ export default function AtriumAgents() {
                 <div key={a.id} style={{background:"#fff",border:`1px solid ${done?a.color+"44":"#E2E8F0"}`,borderTop:`2px solid ${a.color}`,borderRadius:10,padding:"13px 14px",cursor:"pointer",position:"relative"}}
                   onClick={()=>setActiveId(a.id)}>
                   {a.badge&&<div style={{position:"absolute",top:10,right:10,fontSize:9,background:a.color+"20",color:a.color,padding:"2px 7px",borderRadius:99,fontWeight:600}}>{a.badge}</div>}
-                  {done&&<div style={{position:"absolute",top:10,right:10,fontSize:10,color:a.color,fontWeight:700}}>✓ Active</div>}
-                  <div style={{fontSize:22,marginBottom:7}}>{a.icon}</div>
+                  {done&&<div style={{position:"absolute",top:10,right:10,fontSize:10,color:a.color,fontWeight:700,display:"flex",alignItems:"center",gap:3}}><IE emoji="✓" Icon={Check} size={10} color={a.color} />Active</div>}
+                  <div style={{marginBottom:7}}><LkIcon m={AGENT_ICON_MAP} n={a.icon} size={22} color={a.color} /></div>
                   <div style={{fontSize:14,fontWeight:600,color:"#0F172A"}}>{a.name}</div>
                   <div style={{fontSize:11,color:a.color,fontWeight:600,marginBottom:5}}>{a.role}</div>
                   <div style={{fontSize:11,color:"#64748B",lineHeight:1.5,marginBottom:10}}>{a.desc}</div>
@@ -177,7 +192,7 @@ export default function AtriumAgents() {
 
           {/* KOVA handoff */}
           <div style={{marginTop:14,padding:"12px 14px",background:"#EFF6FF",border:"1px solid #BFDBFE",borderRadius:10,display:"flex",gap:12,alignItems:"center"}}>
-            <div style={{fontSize:20,flexShrink:0}}>🔗</div>
+            <div style={{flexShrink:0}}><Link size={20} color="#1E40AF" /></div>
             <div>
               <div style={{fontSize:12,fontWeight:600,color:"#1E40AF",marginBottom:2}}>Day 8 — The KOVA handoff</div>
               <div style={{fontSize:11,color:"#3B82F6"}}>When Maven completes discovery, KOVA reads the business_knowledge and builds your CRM — pipelines, lifecycles, contact strategy — without a consultant. Agents do the configuration. You review and approve.</div>
@@ -192,7 +207,7 @@ export default function AtriumAgents() {
 
           {/* Agent info bar */}
           <div style={{background:"#fff",borderBottom:"1px solid #E2E8F0",padding:"10px 14px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-            <div style={{width:36,height:36,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{agent.icon}</div>
+            <div style={{width:36,height:36,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LkIcon m={AGENT_ICON_MAP} n={agent.icon} size={16} color={agent.color} /></div>
             <div style={{flex:1}}>
               <div style={{fontSize:13,fontWeight:600,color:"#0F172A"}}>{agent.name}</div>
               <div style={{fontSize:11,color:agent.color}}>{agent.role}</div>
@@ -201,8 +216,8 @@ export default function AtriumAgents() {
             <div style={{display:"flex",gap:4}}>
               {AGENTS.filter(a=>a.id!==activeId).slice(0,4).map(a=>(
                 <button key={a.id} onClick={()=>setActiveId(a.id)} title={`Switch to ${a.name}`}
-                  style={{width:28,height:28,borderRadius:"50%",background:completed.has(a.id)?a.color+"20":"#F8FAFC",border:`1px solid ${a.color}44`,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  {a.icon}
+                  style={{width:28,height:28,borderRadius:"50%",background:completed.has(a.id)?a.color+"20":"#F8FAFC",border:`1px solid ${a.color}44`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <LkIcon m={AGENT_ICON_MAP} n={a.icon} size={13} color={completed.has(a.id)?a.color:"#94A3B8"} />
                 </button>
               ))}
             </div>
@@ -212,7 +227,7 @@ export default function AtriumAgents() {
           <div style={{flex:1,overflowY:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:10}}>
             {msgs.length===0&&(
               <div style={{textAlign:"center",padding:"28px 20px",color:"#94A3B8"}}>
-                <div style={{fontSize:28,marginBottom:8}}>{agent.icon}</div>
+                <div style={{marginBottom:8}}><LkIcon m={AGENT_ICON_MAP} n={agent.icon} size={28} color={agent.color} /></div>
                 <div style={{fontSize:13,fontWeight:600,color:"#64748B",marginBottom:4}}>Talk to {agent.name}</div>
                 <div style={{fontSize:11,marginBottom:16}}>{agent.desc}</div>
                 <button onClick={()=>send(QUICK_STARTS[activeId]||`Hi ${agent.name}, I'm ready.`)}
@@ -224,7 +239,7 @@ export default function AtriumAgents() {
             {msgs.map((m,i)=>(
               <div key={i} style={{display:"flex",gap:8,justifyContent:m.role==="user"?"flex-end":"flex-start",alignItems:"flex-end"}}>
                 {m.role==="assistant"&&(
-                  <div style={{width:28,height:28,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0,marginBottom:2}}>{agent.icon}</div>
+                  <div style={{width:28,height:28,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginBottom:2}}><LkIcon m={AGENT_ICON_MAP} n={agent.icon} size={13} color={agent.color} /></div>
                 )}
                 <div style={{maxWidth:"78%",padding:"10px 13px",borderRadius:m.role==="user"?"10px 10px 2px 10px":"10px 10px 10px 2px",background:m.role==="user"?agent.color:"#fff",color:m.role==="user"?"#fff":"#0F172A",fontSize:12,lineHeight:1.7,border:m.role==="assistant"?"1px solid #E2E8F0":"none",whiteSpace:"pre-wrap"}}>
                   {m.content}
@@ -236,7 +251,7 @@ export default function AtriumAgents() {
             ))}
             {loading&&(
               <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
-                <div style={{width:28,height:28,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>{agent.icon}</div>
+                <div style={{width:28,height:28,borderRadius:"50%",background:agent.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LkIcon m={AGENT_ICON_MAP} n={agent.icon} size={13} color={agent.color} /></div>
                 <div style={{padding:"10px 14px",background:"#fff",border:"1px solid #E2E8F0",borderRadius:"10px 10px 10px 2px",display:"flex",gap:4,alignItems:"center"}}>
                   {[0,1,2].map(j=><div key={j} style={{width:6,height:6,borderRadius:"50%",background:agent.color,animation:`pulse 1.2s ${j*0.2}s ease-in-out infinite`}} />)}
                 </div>

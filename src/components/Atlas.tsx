@@ -1,5 +1,13 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { Home, Shield, Factory, HeartPulse, ShoppingBag, Scale, Car, Ruler, HardHat, TreePine, Wrench, Settings2, Zap, CheckCircle2, PartyPopper, Lightbulb } from "lucide-react";
+import { IE } from "@/lib/icon-mode";
+
+type IconMap = Record<string, React.ComponentType<any>>;
+function LkIcon({ m, n, size, color }: { m: IconMap; n: string; size: number; color?: string }) {
+  const Ic = m[n];
+  return Ic ? <Ic size={size} color={color} /> : null;
+}
 
 const SYSTEM = `You are Atlas, KOVA's onboarding assistant. Walk the customer through 6 steps to configure their KOVA account. Ask ONE question at a time. Keep responses under 80 words.
 
@@ -24,7 +32,9 @@ const QUICK: Record<string, string[]> = {
   modules: ["Yes, add those","Core modules only","Tell me more"],
 };
 
-const VERT_ICONS: Record<string,string> = { real_estate:"🏠", insurance:"🛡️", manufacturing:"🏭", healthcare:"🏥", retail:"🛍️", legal:"⚖️", car_dealership:"🚗", land_surveyor:"📐", construction:"🏗️", landscaping:"🌿", mechanic:"🔧", fabrication:"⚙️" };
+const VERT_ICONS: Record<string,string> = { real_estate:"Home", insurance:"Shield", manufacturing:"Factory", healthcare:"HeartPulse", retail:"ShoppingBag", legal:"Scale", car_dealership:"Car", land_surveyor:"Ruler", construction:"HardHat", landscaping:"TreePine", mechanic:"Wrench", fabrication:"Settings2" };
+const VERT_EMOJIS: Record<string,string> = { real_estate:"🏠", insurance:"🛡️", manufacturing:"🏭", healthcare:"🏥", retail:"🛍️", legal:"⚖️", car_dealership:"🚗", land_surveyor:"📐", construction:"🏗️", landscaping:"🌿", mechanic:"🔧", fabrication:"⚙️" };
+const VERT_ICON_MAP: IconMap = { Home, Shield, Factory, HeartPulse, ShoppingBag, Scale, Car, Ruler, HardHat, TreePine, Wrench, Settings2 };
 const MOD_LABELS: Record<string,string> = { skip_trace:"Skip Trace", list_builder:"List Builder", ai_scoring:"AI Scoring", outreach:"Outreach", market_share:"Market Share", lifecycle_triggers:"Life Events", b2b_intel:"B2B Intel", compliance_monitor:"Compliance", scheduled_reports:"Reports", nl_query:"NL Query" };
 const TONE_COLORS: Record<string,string> = { Professional:"#1D4ED8", Conversational:"#15803D", Aggressive:"#B91C1C", Consultative:"#7C3AED" };
 
@@ -86,14 +96,14 @@ export default function Atlas() {
   const qr = QUICK[step] || [];
   const core = ["skip_trace","list_builder","ai_scoring","outreach"];
   const allMods = [...new Set([...core,...(config.active_modules||[])])];
-  const icon = VERT_ICONS[config.vertical_id] || "⚡";
+  const vertIconName = VERT_ICONS[config.vertical_id] || "Zap";
 
   return (
     <div style={{ display:"grid", gridTemplateColumns:"1fr 260px", height:560, background:"#0F172A", borderRadius:12, overflow:"hidden", border:"1px solid rgba(255,255,255,0.07)", fontFamily:"system-ui,-apple-system,sans-serif" }}>
       {/* Chat */}
       <div style={{ display:"flex", flexDirection:"column", overflow:"hidden" }}>
         <div style={{ padding:"12px 16px", borderBottom:"1px solid rgba(255,255,255,0.07)", display:"flex", alignItems:"center", gap:10, background:"#0A1120", flexShrink:0 }}>
-          <div style={{ width:32, height:32, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14 }}>⚡</div>
+          <div style={{ width:32, height:32, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center" }}><IE emoji="⚡" Icon={Zap} size={14} color="#fff" /></div>
           <div><div style={{ fontSize:13, fontWeight:700, color:"#F1F5F9" }}>Atlas</div><div style={{ fontSize:10, color:"#00C896" }}>KOVA Onboarding Guide · Online</div></div>
         </div>
         <div style={{ flex:1, overflowY:"auto", padding:"14px" }}>
@@ -102,7 +112,7 @@ export default function Atlas() {
             const parts = (m.display||"").split(/(\*\*[^*]+\*\*)/g);
             return (
               <div key={i} style={{ display:"flex", justifyContent: isUser?"flex-end":"flex-start", marginBottom:10, alignItems:"flex-end", gap:7 }}>
-                {!isUser && <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, flexShrink:0, marginBottom:2 }}>⚡</div>}
+                {!isUser && <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginBottom:2 }}><IE emoji="⚡" Icon={Zap} size={12} color="#fff" /></div>}
                 <div style={{ maxWidth:"75%", padding:"9px 13px", borderRadius: isUser?"10px 10px 2px 10px":"10px 10px 10px 2px", background: isUser?"linear-gradient(135deg,#00C896,#007A5C)":"rgba(255,255,255,0.06)", fontSize:12, color: isUser?"#fff":"#CBD5E1", lineHeight:1.65 }}>
                   {parts.map((p,j) => p.startsWith("**") ? <strong key={j} style={{ color: isUser?"#fff":"#F1F5F9", fontWeight:700 }}>{p.slice(2,-2)}</strong> : <span key={j}>{p}</span>)}
                 </div>
@@ -111,7 +121,7 @@ export default function Atlas() {
           })}
           {loading && (
             <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:10 }}>
-              <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, flexShrink:0 }}>⚡</div>
+              <div style={{ width:28, height:28, borderRadius:"50%", background:"linear-gradient(135deg,#00C896,#3B9EFF)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><IE emoji="⚡" Icon={Zap} size={12} color="#fff" /></div>
               <div style={{ padding:"9px 13px", borderRadius:"10px 10px 10px 2px", background:"rgba(255,255,255,0.06)", display:"flex", gap:4 }}>
                 {[0,1,2].map(j=><div key={j} style={{ width:6, height:6, borderRadius:"50%", background:"#3B9EFF", animation:`dot ${1.2}s ${j*0.2}s ease-in-out infinite` }} />)}
               </div>
@@ -131,17 +141,17 @@ export default function Atlas() {
             <button onClick={()=>send()} disabled={loading||!input.trim()} style={{ padding:"8px 14px", borderRadius:7, fontSize:12, fontWeight:700, background: input.trim()&&!loading?"linear-gradient(135deg,#00C896,#007A5C)":"rgba(255,255,255,0.06)", border:"none", color: input.trim()&&!loading?"#fff":"#475569", cursor:"pointer", fontFamily:"inherit" }}>Send</button>
           </div>
         )}
-        {complete && <div style={{ padding:"10px 13px", textAlign:"center", fontSize:11, color:"#475569", borderTop:"1px solid rgba(255,255,255,0.06)", background:"#0A1120" }}>✅ Setup complete — your profile is ready →</div>}
+        {complete && <div style={{ padding:"10px 13px", textAlign:"center", fontSize:11, color:"#475569", borderTop:"1px solid rgba(255,255,255,0.06)", background:"#0A1120", display:"flex", alignItems:"center", justifyContent:"center", gap:5 }}><IE emoji="✅" Icon={CheckCircle2} size={12} color="#00C896" /> Setup complete — your profile is ready →</div>}
       </div>
 
       {/* Config panel */}
       {complete ? (
         <div style={{ padding:16, background:"#070B12", borderLeft:"0.5px solid rgba(255,255,255,0.06)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:10, textAlign:"center" }}>
-          <div style={{ fontSize:32 }}>🎉</div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"center" }}><IE emoji="🎉" Icon={PartyPopper} size={32} color="#00C896" /></div>
           <div style={{ fontSize:15, fontWeight:800, color:"#F1F5F9" }}>You're all set!</div>
           <div style={{ padding:14, background:"rgba(0,200,150,0.08)", border:"0.5px solid rgba(0,200,150,0.3)", borderRadius:9, width:"100%", textAlign:"left" }}>
             <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:9 }}>
-              <div style={{ width:32, height:32, borderRadius:7, background:"rgba(0,200,150,0.2)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:16 }}>{icon}</div>
+              <div style={{ width:32, height:32, borderRadius:7, background:"rgba(0,200,150,0.2)", display:"flex", alignItems:"center", justifyContent:"center" }}><IE emoji={VERT_EMOJIS[config.vertical_id] || "⚡"} Icon={VERT_ICON_MAP[vertIconName] || Zap} size={16} color="#00C896" /></div>
               <div><div style={{ fontSize:13, fontWeight:700, color:"#F1F5F9" }}>{config.product_name||config.company_name}</div><div style={{ fontSize:10, color:"#00C896" }}>{config.vertical_label}</div></div>
             </div>
             {[["Sub-type",config.sub_type],["AI Tone",config.tone],["Modules",`${allMods.length} active`]].filter(([,v])=>v).map(([l,v])=>(
@@ -161,7 +171,7 @@ export default function Atlas() {
               <div style={{ width:`${progress}%`, height:"100%", background:"linear-gradient(90deg,#3B9EFF,#00C896)", borderRadius:99, transition:"width 0.5s" }} />
             </div>
           </div>
-          {[["Company",config.company_name],["Platform",config.product_name],["Vertical",config.vertical_label?`${icon} ${config.vertical_label}`:""],["Sub-Type",config.sub_type],["AI Tone",config.tone]].map(([l,v])=>(
+          {[["Company",config.company_name],["Platform",config.product_name],["Vertical",config.vertical_label||""],["Sub-Type",config.sub_type],["AI Tone",config.tone]].map(([l,v])=>(
             <div key={l as string} style={{ padding:"7px 9px", borderRadius:6, border:"0.5px solid", borderColor: v?"rgba(0,200,150,0.2)":"rgba(255,255,255,0.05)", background: v?"rgba(0,200,150,0.06)":"rgba(255,255,255,0.02)", transition:"all 0.3s" }}>
               <div style={{ fontSize:8, color:"#475569", letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:2 }}>{l}</div>
               <div style={{ fontSize:11, color: v?"#F1F5F9":"#1E2A3A", fontWeight: v?500:400, minHeight:15 }}>{String(v)||"—"}</div>
@@ -178,7 +188,7 @@ export default function Atlas() {
           </div>
           {suggestion && (
             <div style={{ marginTop:"auto", padding:"8px 10px", background:"rgba(59,158,255,0.08)", borderRadius:7, border:"0.5px solid rgba(59,158,255,0.2)" }}>
-              <div style={{ fontSize:9, color:"#3B9EFF", marginBottom:2 }}>💡 TIP</div>
+              <div style={{ fontSize:9, color:"#3B9EFF", marginBottom:2, display:"flex", alignItems:"center", gap:3 }}><IE emoji="💡" Icon={Lightbulb} size={9} color="#3B9EFF" /> TIP</div>
               <div style={{ fontSize:10, color:"#94A3B8", lineHeight:1.5 }}>{suggestion}</div>
             </div>
           )}

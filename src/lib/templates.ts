@@ -38,11 +38,26 @@ export const DOC_TEMPLATES: DocTemplate[] = [
   { id:"rec-materials", type:"receipt", name:"Materials Receipt",            industry:"Construction",  accentColor:"#F59E0B", description:"Receipt for materials or parts received",                  defaultTerms:"Items received in good condition.",                              defaultNotes:"Report any damage within 24 hours." },
   { id:"rec-payment",   type:"receipt", name:"Payment Receipt",              industry:"General",       accentColor:"#3B9EFF", description:"Confirmation of payment received",                          defaultTerms:"Payment received. Balance shown is remaining.",                  defaultNotes:"This receipt confirms your payment has been applied." },
   { id:"rec-misc",      type:"receipt", name:"Miscellaneous Services",       industry:"General",       accentColor:"#94A3B8", description:"Receipt for miscellaneous or ad-hoc services",             defaultTerms:"Thank you for your business.",                                   defaultNotes:"For questions, contact us at the information above." },
+  { id:"rec-deposit",   type:"receipt", name:"Deposit Receipt",              industry:"General",       accentColor:"#00C896", description:"Receipt for deposit or down payment collected",             defaultTerms:"Deposit applied to total balance. Non-refundable unless otherwise agreed.", defaultNotes:"Remaining balance due upon project completion." },
+
+  // ── WORK ORDERS ────────────────────────────────────────────────────────────
+  { id:"wo-service",    type:"workorder", name:"Field Service Work Order",   industry:"Home Services", accentColor:"#F59E0B", description:"Work order for field technicians — job details and sign-off",  defaultTerms:"Work to be completed per scope. Customer signature required upon completion.", defaultNotes:"Technician must document before and after photos." },
+  { id:"wo-maintenance",type:"workorder", name:"Preventive Maintenance WO",  industry:"Manufacturing", accentColor:"#A78BFA", description:"Scheduled maintenance work order for equipment or facilities",  defaultTerms:"PM performed per approved schedule. Log all findings.",                       defaultNotes:"Replace any parts flagged as worn during PM window." },
+  { id:"wo-repair",     type:"workorder", name:"Emergency Repair Work Order", industry:"General",      accentColor:"#EF4444", description:"Urgent or unplanned repair work authorization",               defaultTerms:"Emergency rates apply. Authorization required before work begins.",            defaultNotes:"Document root cause and corrective action taken." },
+
+  // ── ADDITIONAL INVOICES ────────────────────────────────────────────────────
+  { id:"inv-real-estate",type:"invoice", name:"Real Estate Commission Invoice", industry:"Real Estate",  accentColor:"#00C896", description:"Commission invoice for closed real estate transaction",   defaultTerms:"Commission due at closing. Wire transfer preferred.",             defaultNotes:"Commission calculated per executed listing agreement." },
+  { id:"inv-landscaping",type:"invoice", name:"Landscaping / Grounds Invoice",  industry:"Landscaping",  accentColor:"#10B981", description:"Recurring or one-time landscaping and grounds maintenance", defaultTerms:"Net 14. Service rendered per schedule.",                         defaultNotes:"Client to ensure property access on service dates." },
+
+  // ── ADDITIONAL ESTIMATES ───────────────────────────────────────────────────
+  { id:"est-healthcare", type:"estimate", name:"Healthcare Services Estimate",  industry:"Healthcare",  accentColor:"#EC4899", description:"Cost estimate for clinical services, equipment, or IT",     defaultTerms:"Estimate valid 30 days. Subject to insurance verification.",     defaultNotes:"Final pricing may vary based on insurance coverage and clinical assessment." },
+  { id:"wo-it",          type:"workorder", name:"IT Support Work Order",        industry:"Technology",  accentColor:"#6366F1", description:"Work order for IT support, installations, and break-fix",   defaultTerms:"Billed at hourly rate. Remote or on-site. Authorization required before work.", defaultNotes:"Document issue found, root cause, and corrective action. Attach screenshots." },
 ];
 
 export const TEMPLATE_TYPES = [
-  { id:"po",        label:"Purchase Orders",  icon:"🛒", count:8, color:"#F59E0B" },
-  { id:"invoice",   label:"Invoices",         icon:"📄", count:8, color:"#3B9EFF" },
-  { id:"estimate",  label:"Estimates",        icon:"📊", count:6, color:"#64748B" },
-  { id:"receipt",   label:"Receipts",         icon:"🧾", count:4, color:"#10B981" },
+  { id:"po",        label:"Purchase Orders",  icon:"ShoppingCart",  count:8,  color:"#F59E0B" },
+  { id:"invoice",   label:"Invoices",         icon:"FileText",       count:10, color:"#3B9EFF" },
+  { id:"estimate",  label:"Estimates",        icon:"BarChart2",      count:7,  color:"#64748B" },
+  { id:"receipt",   label:"Receipts",         icon:"Receipt",        count:5,  color:"#10B981" },
+  { id:"workorder", label:"Work Orders",      icon:"Wrench",         count:4,  color:"#F59E0B" },
 ];

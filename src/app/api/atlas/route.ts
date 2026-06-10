@@ -1,35 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callAI } from "@/lib/ai-adapter";
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, businessContext, vertical, tenantConfig } = await req.json();
-
-    const context = businessContext
-      ? `\n\nBusiness context:\n${JSON.stringify(businessContext, null, 2)}`
-      : "";
-
-    const config = tenantConfig
-      ? `\n\nTenant config:\n${JSON.stringify(tenantConfig, null, 2)}`
-      : "";
-
-    const text = await callAI({
-      task: "atlas",
-      system: `You are Atlas, the KOVA onboarding agent and data intelligence specialist. You help small business owners get their CRM set up and understand their data.
-
-Your two modes:
-1. ONBOARDING — guide a new client through setting up their CRM. Ask about their pipeline stages, typical deal size, main products/services, and how they currently track customers. Build their Carbon Foundation config from the conversation.
-2. INTELLIGENCE — analyze their data and give honest, specific insights. Reference real names and numbers. No generic advice.
-
-Vertical: ${vertical || "general"}.${context}${config}
-
-Be direct. Be specific. One question at a time in onboarding mode. In intelligence mode, lead with the most important finding.`,
+    const { messages, system } = await req.json();
+    const res = await client.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 600,
+      system,
       messages,
-      maxTokens: 700,
     });
-
-    return NextResponse.json({ message: text });
+    const text = (res.content[0] as any).text || "";
+    return NextResponse.json({ text });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: e.message, text: "Sorry, something went wrong." }, { status: 500 });
   }
 }

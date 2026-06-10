@@ -20,6 +20,21 @@ export const SAMPLE_QUOTES: Quote[] = [
     tax:7, created:"May 28, 2026", validUntil:"Jun 28, 2026", sentAt:"May 29, 2026",
   },
   {
+    id:"q4", vertical:"real_estate", number:"Q-2026-004",
+    title:"Brickell Condo Staging & Photography",
+    contact:"Sarah Mitchell", company:"Apex Realty Group", email:"s.mitchell@apexrealty.com",
+    status:"accepted", font:"Inter", coverImage:"", accentColor:"#00C896",
+    intro:"Thank you for trusting us with the Brickell Condo listing. We put together a lean, high-impact package focused on photography and staging essentials that will have the unit market-ready in 5 days.",
+    scope:"Professional photography — 20 edited images · 2BR staging package (living room, master, kitchen) · Twilight exterior shot",
+    terms:"50% deposit to schedule. Balance due on completion. All photos delivered within 48 hours of shoot.",
+    lines:[
+      {id:"l1", description:"Professional Photography — 20 Edited Images", qty:1, unit:"package", price:650},
+      {id:"l2", description:"Staging — 2BR Essential Package", qty:1, unit:"package", price:1800},
+      {id:"l3", description:"Twilight Exterior Shot", qty:1, unit:"job", price:150},
+    ],
+    tax:0, created:"Apr 8, 2026", validUntil:"May 8, 2026", sentAt:"Apr 9, 2026",
+  },
+  {
     id:"q2", vertical:"manufacturing", number:"Q-2026-002",
     title:"Q3 Equipment Supply Agreement — Harmon Industrial",
     contact:"Greg Harmon", company:"Harmon Industrial Supply", email:"g.harmon@harmonindustrial.com",
