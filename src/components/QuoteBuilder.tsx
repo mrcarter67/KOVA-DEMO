@@ -126,7 +126,7 @@ export default function QuoteBuilder({ vertId, onBack }: Props) {
               </div>
               <div style={{textAlign:"right",flexShrink:0}}>
                 <div style={{fontSize:18,fontWeight:700,color:q.accentColor}}>{fmtCurrency(total)}</div>
-                <div style={{fontSize:10,color:"#94A3B8"}}>{q.lines||[]||[].length} line items</div>
+                <div style={{fontSize:10,color:"#94A3B8"}}>{(q.lines||[]).length} line items</div>
               </div>
             </div>
             <div style={{display:"flex",gap:5,marginTop:9}}>

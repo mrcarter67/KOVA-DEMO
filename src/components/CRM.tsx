@@ -719,14 +719,14 @@ export default function CRM() {
           <div style={{width:27,height:27,borderRadius:"50%",background:P+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:P,cursor:"pointer"}}>DU</div>
         </div>
 
-        <div style={{flex:1,display:"flex",flexDirection:"column",overflowY:view==="pipeline"?"hidden":"auto",padding:view==="pipeline"?0:14}} onClick={()=>setVertOpen(false)}>
+        <div style={{flex:1,overflowY:"auto",padding:14,position:"relative"}} onClick={()=>setVertOpen(false)}>
           {view==="dashboard"  && renderDashboard()}
           {view==="companies"  && renderCompanies()}
           {view==="deals"      && renderDeals()}
           {view==="lists"      && renderLists()}
           {view==="reports"    && renderReports()}
           {view==="activity"   && renderActivity()}
-          {view==="pipeline"   && <div style={{flex:1,minHeight:0,overflow:"hidden"}}><PipelineViz /></div>}
+          {view==="pipeline"   && <div style={{position:"absolute",inset:0,overflow:"hidden"}}><PipelineViz /></div>}
           {view==="ask"        && renderAsk()}
           {showDocAgent && (
           <div onClick={()=>setShowDocAgent(false)} style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.5)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
