@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { CONTACTS, COMPANIES, ALL_DEALS, ALL_STAGES, ACTIVITIES, PIPELINE_STAGES, VERTICAL_CONFIG, ALL_VERTICALS } from "@/lib/data";
+import { CONTACTS, COMPANIES, ALL_DEALS, ALL_STAGES, ACTIVITIES, VERTICAL_CONFIG, ALL_VERTICALS } from "@/lib/data";
 import type { Contact, Company, Deal, View, Modal } from "@/lib/types";
 import QuoteBuilder from "@/components/QuoteBuilder";
 import DocumentCenter from "@/components/DocumentCenter";
@@ -9,6 +9,7 @@ import MapView from "@/components/MapView";
 import APIStatus from "@/components/APIStatus";
 import FinancialHub from "@/components/FinancialHub";
 import AgentDocumentAssistant from "@/components/AgentDocumentAssistant";
+import PipelineViz from "@/components/PipelineViz";
 
 type ExtView = View | "pipeline" | "ask" | "quotes" | "docs" | "map" | "finance" | "api";
 
@@ -36,14 +37,6 @@ export default function CRM() {
   const [scoringId, setScoringId] = useState<number|null>(null);
   const [personalizing, setPersonalizing] = useState(false);
   const msgRef = useRef<HTMLTextAreaElement>(null);
-
-  // ── Pipeline state ────────────────────────────────────────────────────────
-  const [pipeStep, setPipeStep]     = useState(-1);
-  const [pipeRunning, setPipeRunning] = useState(false);
-  const [pipeRecord, setPipeRecord] = useState<Contact|null>(null);
-  const [pipeDone, setPipeDone]     = useState(false);
-  const [pipeCount, setPipeCount]   = useState(0);
-  const pipeTimer = useRef<any>(null);
 
   // ── Score All state ───────────────────────────────────────────────────────
   const [scoringAll, setScoringAll]         = useState(false);
@@ -73,7 +66,6 @@ export default function CRM() {
     setVertId(id); setVertOpen(false); setView("dashboard");
     setSelC(null); setSelD(null); setSelCo(null);
     setReport(null); setScoring({});
-    setPipeStep(-1); setPipeRunning(false); setPipeDone(false);
     setNlAnswer(null); setNlHistory([]); setScoreAllDone(false);
   };
 
@@ -128,22 +120,6 @@ export default function CRM() {
       await new Promise(r=>setTimeout(r,600));
     }
     setScoringAll(false); setScoreAllDone(true);
-  };
-
-  // ── Pipeline animation ─────────────────────────────────────────────────────
-  const runPipeline = () => {
-    if(pipeTimer.current) clearInterval(pipeTimer.current);
-    const rec = contacts[Math.floor(Math.random()*contacts.length)];
-    setPipeRecord(rec); setPipeRunning(true); setPipeDone(false); setPipeStep(0);
-    let step = 0;
-    pipeTimer.current = setInterval(()=>{
-      step++;
-      if(step >= PIPELINE_STAGES.length){
-        clearInterval(pipeTimer.current);
-        setPipeRunning(false); setPipeDone(true);
-        setPipeCount(prev=>prev+1);
-      } else { setPipeStep(step); }
-    },1100);
   };
 
   // ── NL Query ───────────────────────────────────────────────────────────────
@@ -245,98 +221,6 @@ export default function CRM() {
           <div style={{fontSize:10,color:"#64748B",marginTop:1}}>{contacts.length} contacts · Claude AI</div>
         </button>
       </div>
-    </div>
-  );
-
-  // ── PIPELINE VISUALIZATION ─────────────────────────────────────────────────
-  const renderPipeline = () => (
-    <div>
-      <style>{`
-        @keyframes kpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(.97)}}
-        @keyframes kflow{0%{opacity:0;transform:translateX(-8px)}100%{opacity:1;transform:translateX(0)}}
-        @keyframes kspin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        .kpulse{animation:kpulse 1.2s ease-in-out infinite}
-        .kflow{animation:kflow .4s ease}
-        .kspin{animation:kspin 1s linear infinite;display:inline-block}
-      `}</style>
-
-      {/* Header */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,padding:"14px 16px",background:"linear-gradient(135deg,#0F172A,#1E293B)",borderRadius:12}}>
-        <div>
-          <div style={{fontSize:14,fontWeight:700,color:"#F1F5F9"}}>Data Pipeline — 9 Stages</div>
-          <div style={{fontSize:11,color:"#64748B",marginTop:2}}>
-            {pipeRunning ? <span className="kpulse" style={{color:"#00C896"}}>● Processing record…</span>
-            : pipeDone ? <span style={{color:"#00C896"}}>● {pipeCount} record{pipeCount!==1?"s":""} processed this session</span>
-            : <span style={{color:"#475569"}}>● Idle — click Run to simulate</span>}
-          </div>
-        </div>
-        <button onClick={runPipeline} disabled={pipeRunning} style={{padding:"9px 20px",background:pipeRunning?"#334155":P,color:pipeRunning?"#94A3B8":"#fff",border:"none",borderRadius:8,fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
-          {pipeRunning?<><span className="kspin">⟳</span> Running…</>:"▶ Run Pipeline"}
-        </button>
-      </div>
-
-      {/* Record being processed */}
-      {pipeRecord && (pipeRunning||pipeDone) && (
-        <div className="kflow" style={{marginBottom:14,padding:"10px 14px",background:P+"10",border:`1px solid ${P}33`,borderRadius:10,display:"flex",gap:12,alignItems:"center"}}>
-          <div style={{width:36,height:36,borderRadius:"50%",background:P+"20",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:P,flexShrink:0}}>{ini(pipeRecord.fn,pipeRecord.ln)}</div>
-          <div style={{flex:1}}>
-            <div style={{fontSize:12,fontWeight:700,color:"#0F172A"}}>{pipeRecord.fn} {pipeRecord.ln} · {pipeRecord.co}</div>
-            <div style={{fontSize:10,color:"#64748B",marginTop:1}}>Source: County Assessor · Vertical: {vert.label} · {pipeRecord.city}</div>
-          </div>
-          {pipeDone && <div style={{...srStyle(liveScore(pipeRecord.id)||pipeRecord.score,40),flexShrink:0}}>{liveScore(pipeRecord.id)||pipeRecord.score}</div>}
-        </div>
-      )}
-
-      {/* 9 Stages */}
-      <div style={{display:"flex",flexDirection:"column",gap:7}}>
-        {PIPELINE_STAGES.map((stage,i)=>{
-          const done    = pipeDone || (pipeRunning && i < pipeStep);
-          const active  = pipeRunning && i === pipeStep;
-          const pending = !pipeRunning && !pipeDone && pipeStep < 0;
-          const pct     = done?100:active?Math.min(95,((Date.now()%1100)/1100)*100):0;
-
-          return (
-            <div key={String((stage as any)?.id || stage)} className={active?"kpulse":""} style={{
-              padding:"12px 14px",borderRadius:10,
-              background:active?P+"10":done?P+"06":"#fff",
-              border:`1px solid ${active?P:done?P+"33":"#E2E8F0"}`,
-              transition:"all .3s",
-            }}>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:34,height:34,borderRadius:8,background:active?P+"20":done?P+"15":"#F8FAFC",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>
-                  {active?<span className="kspin">{(stage as any)?.icon}</span>:(stage as any)?.icon}
-                </div>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                    <div style={{display:"flex",alignItems:"center",gap:7}}>
-                      <span style={{fontSize:13,fontWeight:600,color:"#0F172A"}}>{(stage as any)?.label || String(stage)}</span>
-                      {active && <span style={{fontSize:9,background:P+"20",color:P,padding:"1px 7px",borderRadius:99,fontWeight:700}}>ACTIVE</span>}
-                      {done  && <span style={{fontSize:9,background:"#F0FDF4",color:"#15803D",padding:"1px 7px",borderRadius:99,fontWeight:700}}>DONE ✓</span>}
-                    </div>
-                    <span style={{fontSize:11,fontWeight:700,color:done?"#15803D":active?P:"#94A3B8"}}>
-                      {done?"100%":active?Math.round(pct)+"%":"—"}
-                    </span>
-                  </div>
-                  <div style={{height:4,background:"#F1F5F9",borderRadius:99,overflow:"hidden"}}>
-                    <div style={{width:`${done?100:active?pct:0}%`,height:"100%",background:done?P:P,borderRadius:99,transition:"width .3s"}} />
-                  </div>
-                </div>
-              </div>
-              <div style={{fontSize:11,color:"#94A3B8",marginTop:6,marginLeft:44}}>{(stage as any)?.desc}</div>
-            </div>
-          );
-        })}
-      </div>
-
-      {pipeDone && (
-        <div className="kflow" style={{marginTop:14,padding:"14px 16px",background:"#F0FDF4",border:"1px solid #86EFAC",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{fontSize:13,fontWeight:700,color:"#15803D"}}>✓ Pipeline complete</div>
-            <div style={{fontSize:11,color:"#64748B",marginTop:2}}>{pipeRecord?.fn} {pipeRecord?.ln} processed in ~9 seconds · Score assigned · Outreach queued</div>
-          </div>
-          <button onClick={runPipeline} style={{padding:"7px 16px",background:"#15803D",color:"#fff",border:"none",borderRadius:7,fontSize:12,fontWeight:600,cursor:"pointer"}}>Run Again</button>
-        </div>
-      )}
     </div>
   );
 
@@ -835,14 +719,14 @@ export default function CRM() {
           <div style={{width:27,height:27,borderRadius:"50%",background:P+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:P,cursor:"pointer"}}>DU</div>
         </div>
 
-        <div style={{flex:1,overflowY:"auto",padding:14}} onClick={()=>setVertOpen(false)}>
+        <div style={{flex:1,display:"flex",flexDirection:"column",overflowY:view==="pipeline"?"hidden":"auto",padding:view==="pipeline"?0:14}} onClick={()=>setVertOpen(false)}>
           {view==="dashboard"  && renderDashboard()}
           {view==="companies"  && renderCompanies()}
           {view==="deals"      && renderDeals()}
           {view==="lists"      && renderLists()}
           {view==="reports"    && renderReports()}
           {view==="activity"   && renderActivity()}
-          {view==="pipeline"   && renderPipeline()}
+          {view==="pipeline"   && <div style={{flex:1,minHeight:0,overflow:"hidden"}}><PipelineViz /></div>}
           {view==="ask"        && renderAsk()}
           {showDocAgent && (
           <div onClick={()=>setShowDocAgent(false)} style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.5)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
