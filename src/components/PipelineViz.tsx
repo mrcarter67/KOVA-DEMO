@@ -1,17 +1,26 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { Inbox, Filter, Search, Settings2, Brain, ClipboardList, Radio, Users, Clock, Check, CheckCircle2, Zap } from "lucide-react";
+import { IE } from "@/lib/icon-mode";
+
+type IconMap = Record<string, React.ComponentType<any>>;
+const PIPE_ICON_MAP: IconMap = { Inbox, Filter, Search, Settings2, Brain, ClipboardList, Radio, Users, Clock };
+function LkIcon({ m, n, size, color }: { m: IconMap; n: string; size: number; color?: string }) {
+  const Ic = m[n];
+  return Ic ? <Ic size={size} color={color} /> : null;
+}
 
 const CW = 162, CH = 92;
 
 const STAGES = [
-  { id:"ingest",    label:"Ingest",      icon:"📥", color:"#00C896", glow:"#00C89655", desc:"County Records · MLS · APIs",           type:"data",   count:2840 },
-  { id:"scrub",     label:"Scrub",       icon:"🧹", color:"#00C896", glow:"#00C89655", desc:"Normalize · Dedup · Validate",          type:"data",   count:2761 },
-  { id:"skiptrace", label:"Skip Trace",  icon:"🔍", color:"#3B9EFF", glow:"#3B9EFF55", desc:"BeenVerified · TLO · Whitepages",       type:"enrich", count:2588 },
-  { id:"profile",   label:"Profile",     icon:"⚙️", color:"#3B9EFF", glow:"#3B9EFF55", desc:"Vertical Config · Signal Weights",      type:"enrich", count:2588 },
-  { id:"score",     label:"AI Score",    icon:"🧠", color:"#A78BFA", glow:"#A78BFA55", desc:"Claude Sonnet · 0–100 Composite",       type:"ai",     count:2401 },
-  { id:"listbuild", label:"List Build",  icon:"📋", color:"#F59E0B", glow:"#F59E0B55", desc:"Filter · Stack · Rank",                 type:"output", count:1847 },
-  { id:"outreach",  label:"Outreach",    icon:"📡", color:"#F59E0B", glow:"#F59E0B55", desc:"SMS · Email · AI-Personalized",         type:"output", count:934  },
-  { id:"crm",       label:"CRM",         icon:"👥", color:"#10B981", glow:"#10B98155", desc:"Pipeline · Activities · Insights",      type:"output", count:934  },
-  { id:"reports",   label:"Reports",     icon:"⏰", color:"#10B981", glow:"#10B98155", desc:"Monday AM · Claude-Generated Brief",     type:"output", count:189  },
+  { id:"ingest",    label:"Ingest",      icon:"Inbox",         emoji:"📥", color:"#00C896", glow:"#00C89655", desc:"County Records · MLS · APIs",           type:"data",   count:2840 },
+  { id:"scrub",     label:"Scrub",       icon:"Filter",        emoji:"🧹", color:"#00C896", glow:"#00C89655", desc:"Normalize · Dedup · Validate",          type:"data",   count:2761 },
+  { id:"skiptrace", label:"Skip Trace",  icon:"Search",        emoji:"🔍", color:"#3B9EFF", glow:"#3B9EFF55", desc:"BeenVerified · TLO · Whitepages",       type:"enrich", count:2588 },
+  { id:"profile",   label:"Profile",     icon:"Settings2",     emoji:"⚙️", color:"#3B9EFF", glow:"#3B9EFF55", desc:"Vertical Config · Signal Weights",      type:"enrich", count:2588 },
+  { id:"score",     label:"AI Score",    icon:"Brain",         emoji:"🧠", color:"#A78BFA", glow:"#A78BFA55", desc:"Claude Sonnet · 0–100 Composite",       type:"ai",     count:2401 },
+  { id:"listbuild", label:"List Build",  icon:"ClipboardList", emoji:"📋", color:"#F59E0B", glow:"#F59E0B55", desc:"Filter · Stack · Rank",                 type:"output", count:1847 },
+  { id:"outreach",  label:"Outreach",    icon:"Radio",         emoji:"📡", color:"#F59E0B", glow:"#F59E0B55", desc:"SMS · Email · AI-Personalized",         type:"output", count:934  },
+  { id:"crm",       label:"CRM",         icon:"Users",         emoji:"👥", color:"#10B981", glow:"#10B98155", desc:"Pipeline · Activities · Insights",      type:"output", count:934  },
+  { id:"reports",   label:"Reports",     icon:"Clock",         emoji:"⏰", color:"#10B981", glow:"#10B98155", desc:"Monday AM · Claude-Generated Brief",     type:"output", count:189  },
 ];
 
 const CONNS: [string,string][] = [
@@ -104,21 +113,21 @@ export default function PipelineViz() {
       if(prevSid && sid) setActiveConn(`${prevSid}-${sid}`);
 
       const msgs: Record<string,string[]> = {
-        scrub:     [`🧹 Normalized: "${rec.name}"`, `   Phone: +1 (305) 555-0142 · Quality 96%`],
-        skiptrace: [`🔍 Skip tracing via BeenVerified…`, `   ✓ Phone confirmed · Email resolved`],
-        profile:   [`⚙️  Profile: ${rec.co}`, `   Weights applied · ${rec.insight}`],
-        score:     [`🧠 Claude scoring record…`, `   Analyzing ${rec.insight}`],
-        listbuild: [`📋 Ranked #${Math.floor(Math.random()*8)+2} in priority list`],
-        outreach:  [`📡 AI personalizing message…`, `   ✓ SMS queued · Hi ${rec.name.split(" ")[0]}…`],
-        crm:       [`👥 Added to pipeline · Stage: Qualified`],
-        reports:   [`⏰ Added to Monday briefing`],
+        scrub:     [`[SCRUB] Normalized: "${rec.name}"`, `   Phone: +1 (305) 555-0142 · Quality 96%`],
+        skiptrace: [`[SEARCH] Skip tracing via BeenVerified…`, `   >> Phone confirmed · Email resolved`],
+        profile:   [`[PROFILE] ${rec.co}`, `   Weights applied · ${rec.insight}`],
+        score:     [`[AI] Claude scoring record…`, `   Analyzing ${rec.insight}`],
+        listbuild: [`[LIST] Ranked #${Math.floor(Math.random()*8)+2} in priority list`],
+        outreach:  [`[OUTREACH] AI personalizing message…`, `   >> SMS queued · Hi ${rec.name.split(" ")[0]}…`],
+        crm:       [`[CRM] Added to pipeline · Stage: Qualified`],
+        reports:   [`[REPORT] Added to Monday briefing`],
       };
       const logLines = msgs[sid] || [];
       if(logLines.length) setAiLog(prev=>[...logLines.reverse(), ...prev.slice(0,9)]);
 
       if(sid==="score"){
         setTimeout(()=>{
-          setAiLog(prev=>[`⚡  Score: ${rec.score}/100 — "${rec.insight.substring(0,36)}"`, ...prev.slice(0,9)]);
+          setAiLog(prev=>[`[SCORE] ${rec.score}/100 — "${rec.insight.substring(0,36)}"`, ...prev.slice(0,9)]);
           setStats(s=>({...s,scored:s.scored+1}));
         },700);
       }
@@ -130,7 +139,7 @@ export default function PipelineViz() {
         setTimeout(()=>{
           setRunning(false); setDone(true); setRunStep(-1);
           setStats(s=>({...s,processed:s.processed+1}));
-          setAiLog(prev=>[`✅  ${rec.name} complete — score ${rec.score} · outreach queued`, ...prev.slice(0,9)]);
+          setAiLog(prev=>[`[DONE] ${rec.name} complete — score ${rec.score} · outreach queued`, ...prev.slice(0,9)]);
         },600);
       }
     },1150);
@@ -159,8 +168,7 @@ export default function PipelineViz() {
 
   return (
     <div style={{background:"#040810",minHeight:"100%",fontFamily:"'JetBrains Mono',monospace",userSelect:"none",overflow:"hidden"}}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+      <style suppressHydrationWarning>{`
         * { box-sizing:border-box; }
         .stage-card { transition: box-shadow 0.3s, border-color 0.3s; }
         .stage-card:hover { filter:brightness(1.08); }
@@ -280,12 +288,12 @@ export default function PipelineViz() {
                 {/* Top bar */}
                 <div style={{background:`linear-gradient(90deg,${stage.color}22,transparent)`,borderBottom:`1px solid ${stage.color}22`,padding:"6px 9px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:14}}>{stage.icon}</span>
+                    <IE emoji={stage.emoji} Icon={PIPE_ICON_MAP[stage.icon] || Inbox} size={14} color={active?stage.color:complete?stage.color+"cc":"#94A3B8"} />
                     <span style={{fontSize:11,fontWeight:700,color:active?stage.color:complete?stage.color+"cc":"#94A3B8",letterSpacing:"0.5px"}}>{stage.label}</span>
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:4}}>
                     {active && <span className="ai-blink" style={{width:6,height:6,borderRadius:"50%",background:stage.color,display:"inline-block"}} />}
-                    {complete && <span style={{fontSize:8,color:stage.color,fontWeight:700}}>✓</span>}
+                    {complete && <IE emoji="✓" Icon={Check} size={8} color={stage.color} />}
                     <span style={{fontSize:8,color:"#334155",background:"#0A1018",padding:"1px 5px",borderRadius:2,border:"1px solid #1E293B"}}>
                       {stage.type==="ai"?"AI":stage.type==="enrich"?"ENR":"SYS"}
                     </span>
@@ -330,7 +338,7 @@ export default function PipelineViz() {
           {/* Done celebration */}
           {done && (
             <div style={{position:"absolute",left:"50%",top:"50%",transform:"translate(-50%,-50%)",background:"#0A1520",border:"1px solid #00C896",borderRadius:12,padding:"16px 24px",textAlign:"center",boxShadow:"0 0 40px #00C89633",zIndex:100,animation:"flow-in 0.3s ease"}}>
-              <div style={{fontSize:22,marginBottom:6}}>✅</div>
+              <div style={{display:"flex",justifyContent:"center",marginBottom:6}}><IE emoji="✅" Icon={CheckCircle2} size={22} color="#00C896" /></div>
               <div style={{fontSize:13,fontWeight:700,color:"#00C896"}}>{curRec?.name}</div>
               <div style={{fontSize:11,color:"#475569",marginTop:2}}>Score {curRec?.score}/100 · Outreach queued</div>
               <button onClick={runSim} style={{marginTop:10,padding:"5px 14px",background:"#00C896",color:"#000",border:"none",borderRadius:5,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Next Record ▶</button>
@@ -339,7 +347,7 @@ export default function PipelineViz() {
 
           {/* Drag hint */}
           <div style={{position:"absolute",bottom:10,left:"50%",transform:"translateX(-50%)",fontSize:9,color:"#1E293B",letterSpacing:"2px",pointerEvents:"none"}}>
-            DRAG STAGES TO REARRANGE · CLICK ▶ RUN PIPELINE TO SIMULATE
+            DRAG STAGES TO REARRANGE · CLICK ▶ RUN PIPELINE
           </div>
         </div>
 
@@ -347,7 +355,7 @@ export default function PipelineViz() {
         <div style={{width:240,borderLeft:"1px solid #0D1A2B",background:"#040C16",display:"flex",flexDirection:"column",flexShrink:0}}>
           {/* Claude header */}
           <div style={{padding:"10px 12px",borderBottom:"1px solid #0D1A2B",display:"flex",alignItems:"center",gap:8}}>
-            <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#00C896,#3B9EFF)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,flexShrink:0}}>⚡</div>
+            <div style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,#00C896,#3B9EFF)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><IE emoji="⚡" Icon={Zap} size={13} color="#fff" /></div>
             <div>
               <div style={{fontSize:11,fontWeight:700,color:"#F1F5F9"}}>Claude API</div>
               <div style={{fontSize:9,color:"#00C896",display:"flex",alignItems:"center",gap:4}}>
@@ -374,7 +382,7 @@ export default function PipelineViz() {
               <div key={i} className="log-line" style={{
                 padding:"4px 10px",
                 fontSize:10,lineHeight:1.5,
-                color: line.startsWith("✅")?"#00C896":line.startsWith("⚡")?"#A78BFA":line.startsWith("🧠")?"#A78BFA":line.startsWith("▶")?"#F1F5F9":line.startsWith("●")?"#334155":"#475569",
+                color: line.startsWith("[DONE]")?"#00C896":line.startsWith("[SCORE]")?"#A78BFA":line.startsWith("[AI]")?"#A78BFA":line.startsWith("▶")?"#F1F5F9":line.startsWith("●")?"#334155":"#475569",
                 borderBottom:"1px solid #060D16",
                 background:i===0?"#0A1520":"transparent",
               }}>{line}</div>

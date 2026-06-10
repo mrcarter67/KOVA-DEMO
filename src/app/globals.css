@@ -1,6 +1,54 @@
-*{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;background:#F8FAFC;font-family:system-ui,-apple-system,sans-serif;}
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:2px;}
-input:focus,textarea:focus,select:focus{outline:none;}
-button{font-family:inherit;cursor:pointer;}
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@theme {
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+  --color-card: #ffffff;
+  --color-card-foreground: #0F172A;
+  --color-primary: #0F172A;
+  --color-primary-foreground: #F8FAFC;
+  --color-secondary: #F1F5F9;
+  --color-secondary-foreground: #0F172A;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-accent: #00C896;
+  --color-accent-foreground: #ffffff;
+  --color-border: #E2E8F0;
+  --color-input: #E2E8F0;
+  --color-ring: #0F172A;
+  --color-destructive: #EF4444;
+  --color-kova-green: #00C896;
+  --color-kova-blue: #3B9EFF;
+  --color-kova-amber: #F59E0B;
+  --color-kova-red: #EF4444;
+  --color-kova-purple: #A78BFA;
+  --radius: 0.5rem;
+}
+
+/* ── Base (preserved from original) ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #F8FAFC; font-family: system-ui, -apple-system, sans-serif; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+input:focus, textarea:focus, select:focus { outline: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ── Drag-and-drop ─────────────────────────────────────────────────────────*/
+.fin-section-drag { transition: opacity 150ms ease, transform 150ms ease; }
+.fin-section-drag.dragging { opacity: 0.4; transform: scale(0.98); }
+.fin-section-drag.drag-over { outline: 2px dashed #00C896; outline-offset: 4px; border-radius: 12px; }
+
+/* ── Chart animations ──────────────────────────────────────────────────────*/
+@keyframes bar-grow { from { transform: scaleY(0); transform-origin: bottom; } to { transform: scaleY(1); transform-origin: bottom; } }
+@keyframes fade-up  { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ring-fill { from { stroke-dashoffset: 251; } to { stroke-dashoffset: var(--ring-offset); } }
+.bar-animated { animation: bar-grow 0.5s ease-out forwards; }
+.fade-up      { animation: fade-up  0.4s ease-out forwards; }
+.ring-animated { animation: ring-fill 0.9s ease-out forwards; }
+
+/* ── Toast ──────────────────────────────────────────────────────────────────*/
+@keyframes toast-in  { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
+@keyframes toast-out { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(24px); } }
+.toast-enter { animation: toast-in  0.2s ease-out forwards; }
+.toast-exit  { animation: toast-out 0.18s ease-in  forwards; }

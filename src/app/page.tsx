@@ -1,13 +1,16 @@
 "use client";
 import { useState } from "react";
+import { BarChart2, Target, RefreshCw, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { IE } from "@/lib/icon-mode";
 
 export default function Home() {
   const [hover, setHover] = useState("");
-  const items = [
-    { href:"/dashboard", label:"KOVA CRM", sub:"Contacts · Pipeline · AI Scoring · Reports", color:"#3B9EFF", icon:"📊" },
-    { href:"/atrium",    label:"Atrium",   sub:"Your marketing team · 8 AI specialists",    color:"#00C8A0", icon:"🎯" },
-    { href:"/pipeline",  label:"Data Pipeline", sub:"9-stage animated data flow",           color:"#A78BFA", icon:"🔄" },
-    { href:"/onboard",   label:"Atlas Onboarding", sub:"AI-guided client setup",            color:"#F59E0B", icon:"⚡" },
+  const items: { href:string; label:string; sub:string; color:string; Icon:LucideIcon; emoji:string }[] = [
+    { href:"/dashboard", label:"KOVA CRM",        sub:"Contacts · Pipeline · AI Scoring · Reports", color:"#3B9EFF", Icon:BarChart2, emoji:"📊" },
+    { href:"/atrium",    label:"Atrium",           sub:"Your marketing team · 8 AI specialists",    color:"#00C8A0", Icon:Target,   emoji:"🎯" },
+    { href:"/pipeline",  label:"Data Pipeline",    sub:"9-stage animated data flow",                color:"#A78BFA", Icon:RefreshCw, emoji:"🔄" },
+    { href:"/onboard",   label:"Atlas Onboarding", sub:"AI-guided client setup",                    color:"#F59E0B", Icon:Zap,      emoji:"⚡" },
   ];
   return (
     <div style={{minHeight:"100vh",background:"#0F172A",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"system-ui,sans-serif",padding:20}}>
@@ -21,7 +24,7 @@ export default function Home() {
             <a key={item.href} href={item.href} style={{textDecoration:"none"}}
               onMouseEnter={()=>setHover(item.href)} onMouseLeave={()=>setHover("")}>
               <div style={{background:hover===item.href?"#1E293B":"#0D1520",border:`1px solid ${hover===item.href?item.color+"55":"#1E293B"}`,borderLeft:`3px solid ${item.color}`,borderRadius:10,padding:"14px 16px",display:"flex",alignItems:"center",gap:12,transition:"all .15s"}}>
-                <div style={{fontSize:22,flexShrink:0}}>{item.icon}</div>
+                <div style={{flexShrink:0,display:"flex",alignItems:"center"}}><IE emoji={item.emoji} Icon={item.Icon} size={22} color={item.color} /></div>
                 <div>
                   <div style={{fontSize:14,fontWeight:600,color:"#F1F5F9"}}>{item.label}</div>
                   <div style={{fontSize:11,color:"#64748B",marginTop:2}}>{item.sub}</div>
